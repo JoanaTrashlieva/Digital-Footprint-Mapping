@@ -1,0 +1,32 @@
+name: Google Scraper
+
+on:
+  schedule:
+    - cron: "0 6 * * *"  # every day at 06:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run scraper
+        env:
+          SERP_API_KEY: ${{ secrets.SERP_API_KEY }}
+          QUERY: ${{ secrets.QUERY }}
+        run: python models/google.py
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: search-results
+          path: google-scrape-results.json
